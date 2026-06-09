@@ -1,7 +1,7 @@
 {
   "name": "w2l",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "concurrently -k \"npm run dev\" \"electron .\""
+    "start": "concurrently -k \"npm run dev\" \"electron .\"",
+    "build-app": "vite build && electron-builder"
   },
   "dependencies": {
     "react": "^19.2.6",
@@ -22,10 +23,39 @@
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^8.2.2",
     "electron": "^31.0.0",
+    "electron-builder": "^26.15.2",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "vite": "^8.0.12"
+  },
+  "build": {
+    "appId": "com.w2l.terminal",
+    "productName": "W2L",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "bin/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "appx"
+      ]
+    },
+    "appx": {
+      "publisher": "CN=quantasysom",
+      "publisherDisplayName": "quantasysom",
+      "displayName": "W2L - Terminal and Coding Agent",
+      "identityName": "com.w2l.terminal",
+      "languages": [
+        "en-US"
+      ]
+    }
   }
 }
