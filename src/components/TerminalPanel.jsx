@@ -5,12 +5,16 @@ const PROMPT_USER = 'dev';
 const PROMPT_HOST = 'W2L';
 
 function shortNix(cwd, nixRoot) {
-  if (cwd === nixRoot) {
-    const dirName = nixRoot ? nixRoot.split('/').pop() : 'w2l';
-    return `~/projects/${dirName}`;
-  }
-  return cwd;
+  if (!cwd || cwd === '/') return '/';
+  if (cwd === '~') return '~';
+  
+  // Normalize path (remove trailing slash if present, except for root)
+  const normalized = cwd.endsWith('/') && cwd.length > 1 ? cwd.slice(0, -1) : cwd;
+  
+  const segments = normalized.split('/').filter(Boolean);
+  return segments.pop() || '/';
 }
+
 
 
 function Prompt({ cwd, nixRoot }) {
