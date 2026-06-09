@@ -8,7 +8,10 @@ const os = require('os');
 let mainWindow;
 let activeProcess = null;
 
-const binDir = path.join(__dirname, 'bin');
+const isDev = !app.isPackaged;
+const binDir = isDev 
+  ? path.join(__dirname, 'bin')
+  : path.join(process.resourcesPath, 'app.asar.unpacked', 'bin');
 const bridgesDir = path.join(binDir, 'powershell-bridges');
 const busyboxPath = path.join(binDir, 'busybox.exe');
 
@@ -136,8 +139,14 @@ app.on('window-all-closed', () => {
 
 // Setup custom PowerShell bridges
 function createPowerShellBridges() {
-  // 1. apt bridge (winget under the hood)
-  const aptCmd = `@echo off\npowershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0apt.ps1'" %*`;
+  const aptCmdPath = path.join(bridgesDir, 'apt.cmd');
+  if (app.isPackaged && fs.existsSync(aptCmdPath)) {
+    return; // Already bundled and unpacked, skip writing to read-only resource dir
+  }
+
+  try {
+    // 1. apt bridge (winget under the hood)
+    const aptCmd = `@echo off\npowershell -NoProfile -ExecutionPolicy Bypass -Command "& '%~dp0apt.ps1'" %*`;
   const aptPs1 = `
 param(
     [string]$action,
@@ -198,14 +207,17 @@ Write-Host "Opening target: $target" -ForegroundColor Green
 Start-Process $target
 `;
 
-  fs.writeFileSync(path.join(bridgesDir, 'apt.cmd'), aptCmd);
-  fs.writeFileSync(path.join(bridgesDir, 'apt.ps1'), aptPs1);
-  fs.writeFileSync(path.join(bridgesDir, 'systemctl.cmd'), systemctlCmd);
-  fs.writeFileSync(path.join(bridgesDir, 'systemctl.ps1'), systemctlPs1);
-  fs.writeFileSync(path.join(bridgesDir, 'open.cmd'), openCmd);
-  fs.writeFileSync(path.join(bridgesDir, 'open.ps1'), openPs1);
-  fs.writeFileSync(path.join(bridgesDir, 'xdg-open.cmd'), openCmd); // Link xdg-open to open
-  fs.writeFileSync(path.join(bridgesDir, 'xdg-open.ps1'), openPs1);
+    fs.writeFileSync(path.join(bridgesDir, 'apt.cmd'), aptCmd);
+    fs.writeFileSync(path.join(bridgesDir, 'apt.ps1'), aptPs1);
+    fs.writeFileSync(path.join(bridgesDir, 'systemctl.cmd'), systemctlCmd);
+    fs.writeFileSync(path.join(bridgesDir, 'systemctl.ps1'), systemctlPs1);
+    fs.writeFileSync(path.join(bridgesDir, 'open.cmd'), openCmd);
+    fs.writeFileSync(path.join(bridgesDir, 'open.ps1'), openPs1);
+    fs.writeFileSync(path.join(bridgesDir, 'xdg-open.cmd'), openCmd); // Link xdg-open to open
+    fs.writeFileSync(path.join(bridgesDir, 'xdg-open.ps1'), openPs1);
+  } catch (err) {
+    console.warn('Could not write PowerShell bridges:', err.message);
+  }
 }
 
 // --- IPC IPC HANDLERS ---

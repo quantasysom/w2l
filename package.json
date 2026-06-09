@@ -33,6 +33,10 @@
   "build": {
     "appId": "com.w2l.terminal",
     "productName": "W2L",
+    "asar": true,
+    "asarUnpack": [
+      "bin/**/*"
+    ],
     "directories": {
       "output": "dist-electron"
     },
