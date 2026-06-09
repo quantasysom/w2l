@@ -5,9 +5,13 @@ const PROMPT_USER = 'dev';
 const PROMPT_HOST = 'W2L';
 
 function shortNix(cwd, nixRoot) {
-  if (cwd === nixRoot) return '~/projects/api-gateway';
+  if (cwd === nixRoot) {
+    const dirName = nixRoot ? nixRoot.split('/').pop() : 'w2l';
+    return `~/projects/${dirName}`;
+  }
   return cwd;
 }
+
 
 function Prompt({ cwd, nixRoot }) {
   return (
