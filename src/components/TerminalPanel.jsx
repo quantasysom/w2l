@@ -44,17 +44,28 @@ function PromptSegment({ text, icon, bgColor, textColor, nextBgColor }) {
 }
 
 function Prompt({ cwd, nixRoot }) {
-  const folder = shortNix(cwd, nixRoot);
+  // Translate home shortcut to virtual nix root
+  const normalized = cwd === '~' ? nixRoot : cwd;
+  const pathString = normalized.endsWith('/') && normalized.length > 1 
+    ? normalized.slice(0, -1) 
+    : normalized;
+    
+  let segments = pathString.split('/').filter(Boolean);
   
-  // Powerline-style colors matching the requested style
-  const folderBg = '#e8457a'; // Pink
-  const folderText = '#ffffff';
+  // Hande root case
+  if (segments.length === 0) {
+    segments = ['/'];
+  }
   
-  const gitBg = '#eedc3a'; // Yellow
-  const gitText = '#111111';
+  // Retrieve the last 3 directories (breadcrumbs)
+  const displaySegments = segments.slice(-3);
   
-  const sysBg = '#20969b'; // Teal
-  const sysText = '#ffffff';
+  // Powerline segments color scheme
+  const colors = [
+    { bg: '#e8457a', text: '#ffffff' }, // Pink
+    { bg: '#eedc3a', text: '#111111' }, // Yellow
+    { bg: '#20969b', text: '#ffffff' }, // Teal
+  ];
   
   return (
     <div className="t-prompt-container" style={{
@@ -66,30 +77,26 @@ function Prompt({ cwd, nixRoot }) {
       marginRight: '8px',
       verticalAlign: 'middle',
     }}>
-      <PromptSegment
-        icon={<Icon name="folder" size={11} sw={2.4} />}
-        text={folder}
-        bgColor={folderBg}
-        textColor={folderText}
-        nextBgColor={gitBg}
-      />
-      <PromptSegment
-        icon={<Icon name="git" size={11} sw={2.4} />}
-        text="main"
-        bgColor={gitBg}
-        textColor={gitText}
-        nextBgColor={sysBg}
-      />
-      <PromptSegment
-        icon={<Icon name="terminal" size={11} sw={2.4} />}
-        text="w2l"
-        bgColor={sysBg}
-        textColor={sysText}
-        nextBgColor={null}
-      />
+      {displaySegments.map((segment, index) => {
+        const isLast = index === displaySegments.length - 1;
+        const color = colors[index] || colors[0];
+        const nextColor = isLast ? null : (colors[index + 1] || colors[0]).bg;
+        
+        return (
+          <PromptSegment
+            key={index}
+            icon={index === 0 ? <Icon name="folder" size={11} sw={2.4} /> : null}
+            text={segment}
+            bgColor={color.bg}
+            textColor={color.text}
+            nextBgColor={nextColor}
+          />
+        );
+      })}
     </div>
   );
 }
+
 
 
 function Line({ line, nixRoot }) {
