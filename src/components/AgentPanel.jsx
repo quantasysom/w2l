@@ -64,7 +64,7 @@ function PlanCard({ items, doneCount }) {
   );
 }
 
-export function AgentPanel({ winRoot, onViewDiff, onActivity, onDirUpdate }) {
+export function AgentPanel({ winRoot, onViewDiff, onActivity, onDirUpdate, collapsed }) {
   const [msgs, setMsgs] = useState([
     { role: 'agent', kind: 'greet', text: "Hi — I'm the W2L agent. I can read and edit files, run shell commands, and work through tasks autonomously. I have placeholders for LLM integration. Try running a simulated task below!" },
   ]);
@@ -90,24 +90,24 @@ export function AgentPanel({ winRoot, onViewDiff, onActivity, onDirUpdate }) {
       { kind: 'edit', file: 'src/routes.js',
         before:
 `const router = require('express').Router();
-
+ 
 router.get('/users', (req, res) => res.json([]));
 router.post('/users', (req, res) => res.status(201).json(req.body));
-
+ 
 module.exports = router;`,
         after:
 `const router = require('express').Router();
 const { version } = require('../package.json');
-
+ 
 router.get('/health', (req, res) => res.json({
   status: 'ok',
   uptime: process.uptime(),
   version,
 }));
-
+ 
 router.get('/users', (req, res) => res.json([]));
 router.post('/users', (req, res) => res.status(201).json(req.body));
-
+ 
 module.exports = router;` },
       { kind: 'tool', tool: 'bash', arg: 'npm run dev', result: 'listening on :8080' },
       { kind: 'tool', tool: 'bash', arg: 'curl -s localhost:8080/api/health', result: '200 OK' },
@@ -200,7 +200,7 @@ module.exports = router;` },
   }
 
   return (
-    <div className="panel agent">
+    <div className="panel agent" style={collapsed ? { display: 'none' } : undefined}>
       <div className="panel-head">
         <Icon name="sparkle" size={14} style={{ color: 'var(--accent)' }} />
         <span style={{ color: 'var(--text-dim)' }}>Agent</span>

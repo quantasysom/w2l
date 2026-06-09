@@ -29,6 +29,8 @@ function App() {
   const [diffStep, setDiffStep] = useState(null);
   const [activeFile, setActiveFile] = useState('');
   const [agentState, setAgentState] = useState('idle');
+  const [explorerCollapsed, setExplorerCollapsed] = useState(false);
+  const [agentCollapsed, setAgentCollapsed] = useState(false);
 
   // Directory paths
   const [winRoot, setWinRoot] = useState('');
@@ -70,6 +72,14 @@ function App() {
       if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault();
         setTweaksOpen((o) => !o);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        setExplorerCollapsed((o) => !o);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        setAgentCollapsed((o) => !o);
       }
       if (e.key === 'Escape') {
         setPaletteOpen(false);
@@ -118,6 +128,20 @@ function App() {
           <span className="dot" /> bash · Windows Native · W2L Emulator
         </div>
         <div className="tb-winctl">
+          <button 
+            title="Toggle Explorer (Ctrl+B)" 
+            onClick={() => setExplorerCollapsed(c => !c)}
+            style={{ opacity: explorerCollapsed ? 0.4 : 1 }}
+          >
+            <Icon name="sidebar" size={15} />
+          </button>
+          <button 
+            title="Toggle Agent (Ctrl+I)" 
+            onClick={() => setAgentCollapsed(c => !c)}
+            style={{ opacity: agentCollapsed ? 0.4 : 1 }}
+          >
+            <Icon name="sparkle" size={14} />
+          </button>
           <button title="Minimize"><Icon name="min" size={15} /></button>
           <button title="Maximize"><Icon name="max" size={13} /></button>
           <button className="close" title="Close" onClick={() => window.close()}><Icon name="x" size={15} /></button>
@@ -125,7 +149,7 @@ function App() {
       </div>
 
       {/* Workspace */}
-      <div className="workspace">
+      <div className={`workspace ${explorerCollapsed ? 'explorer-collapsed' : ''} ${agentCollapsed ? 'agent-collapsed' : ''}`}>
         <Explorer 
           winRoot={winRoot} 
           nixRoot={nixRoot}
@@ -133,6 +157,7 @@ function App() {
           onOpen={setActiveFile} 
           refreshKey={refreshKey}
           onRefresh={triggerDirUpdate}
+          collapsed={explorerCollapsed}
         />
         <TerminalPanel 
           winRoot={winRoot}
@@ -147,6 +172,7 @@ function App() {
           onViewDiff={setDiffStep} 
           onActivity={setAgentState} 
           onDirUpdate={triggerDirUpdate}
+          collapsed={agentCollapsed}
         />
       </div>
 

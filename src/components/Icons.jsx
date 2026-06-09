@@ -98,6 +98,12 @@ const iconPaths = {
       />
     </>
   ),
+  sidebar: (sw) => (
+    <>
+      <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={sw} />
+      <path d="M9 3v18" strokeWidth={sw} strokeLinecap="round" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 16, sw = 1.8, style, className }) {

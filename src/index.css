@@ -173,6 +173,8 @@ input, textarea { font-family: inherit; }
 }
 .workspace.agent-collapsed { grid-template-columns: var(--explorer-w, 252px) 1fr 0; }
 .workspace.explorer-collapsed { grid-template-columns: 0 1fr var(--agent-w, 380px); }
+.workspace.explorer-collapsed.agent-collapsed { grid-template-columns: 0 1fr 0; }
+.workspace.explorer-collapsed .terminal { border-left: none; }
 
 .panel {
   min-width: 0; min-height: 0;

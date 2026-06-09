@@ -33,7 +33,7 @@ function TreeNode({ node, depth, onOpen, activeFile }) {
   );
 }
 
-export function Explorer({ winRoot, nixRoot, activeFile, onOpen, refreshKey, onRefresh }) {
+export function Explorer({ winRoot, nixRoot, activeFile, onOpen, refreshKey, onRefresh, collapsed }) {
   const [tree, setTree] = useState([]);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function Explorer({ winRoot, nixRoot, activeFile, onOpen, refreshKey, onR
   }, [winRoot, refreshKey]);
 
   return (
-    <div className="panel explorer">
+    <div className="panel explorer" style={collapsed ? { display: 'none' } : undefined}>
       <div className="panel-head">
         <span>Explorer</span>
         <span className="grow" />
