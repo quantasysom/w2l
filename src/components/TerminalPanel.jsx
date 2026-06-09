@@ -17,19 +17,80 @@ function shortNix(cwd, nixRoot) {
 
 
 
-function Prompt({ cwd, nixRoot }) {
+function PromptSegment({ text, icon, bgColor, textColor, nextBgColor }) {
   return (
-    <span className="t-prompt">
-      <span className="u">{PROMPT_USER}</span>
-      <span className="at">@</span>
-      <span className="h">{PROMPT_HOST}</span>
-      <span className="sep">:</span>
-      <span className="p">{shortNix(cwd, nixRoot)}</span>
-      <span className="branch"> (main)</span>
-      <span className="dollar"> $</span>
-    </span>
+    <div style={{ display: 'inline-flex', alignItems: 'stretch' }}>
+      <div style={{
+        backgroundColor: bgColor,
+        color: textColor,
+        display: 'inline-flex',
+        alignItems: 'center',
+        paddingLeft: '8px',
+        paddingRight: '4px',
+        fontSize: '11px',
+        fontWeight: 'bold',
+        fontFamily: 'var(--font-mono)',
+        whiteSpace: 'nowrap',
+      }}>
+        {icon && <span style={{ marginRight: '5px', display: 'inline-flex', alignItems: 'center' }}>{icon}</span>}
+        {text}
+      </div>
+      <svg width="10" height="20" viewBox="0 0 10 20" style={{ display: 'block', flexShrink: 0 }}>
+        {nextBgColor && <rect width="10" height="20" fill={nextBgColor} />}
+        <path d="M0 0 L10 10 L0 20 Z" fill={bgColor} />
+      </svg>
+    </div>
   );
 }
+
+function Prompt({ cwd, nixRoot }) {
+  const folder = shortNix(cwd, nixRoot);
+  
+  // Powerline-style colors matching the requested style
+  const folderBg = '#e8457a'; // Pink
+  const folderText = '#ffffff';
+  
+  const gitBg = '#eedc3a'; // Yellow
+  const gitText = '#111111';
+  
+  const sysBg = '#20969b'; // Teal
+  const sysText = '#ffffff';
+  
+  return (
+    <div className="t-prompt-container" style={{
+      display: 'inline-flex',
+      alignItems: 'stretch',
+      height: '20px',
+      borderRadius: '4px',
+      overflow: 'hidden',
+      marginRight: '8px',
+      verticalAlign: 'middle',
+    }}>
+      <PromptSegment
+        icon={<Icon name="folder" size={11} sw={2.4} />}
+        text={folder}
+        bgColor={folderBg}
+        textColor={folderText}
+        nextBgColor={gitBg}
+      />
+      <PromptSegment
+        icon={<Icon name="git" size={11} sw={2.4} />}
+        text="main"
+        bgColor={gitBg}
+        textColor={gitText}
+        nextBgColor={sysBg}
+      />
+      <PromptSegment
+        icon={<Icon name="terminal" size={11} sw={2.4} />}
+        text="w2l"
+        bgColor={sysBg}
+        textColor={sysText}
+        nextBgColor={null}
+      />
+    </div>
+  );
+}
+
 
 function Line({ line, nixRoot }) {
   const cls = 't-line' + (line.cls ? ' c-' + line.cls : '');
