@@ -266,6 +266,56 @@ export function TerminalPanel({
     setRunning(false);
   }
 
+  // Helper to find common prefix among strings
+  function getCommonPrefix(strings) {
+    if (!strings || strings.length === 0) return '';
+    let common = strings[0];
+    for (let i = 1; i < strings.length; i++) {
+      let j = 0;
+      while (j < common.length && j < strings[i].length && common[j] === strings[i][j]) {
+        j++;
+      }
+      common = common.substring(0, j);
+    }
+    return common;
+  }
+
+  async function handleTabCompletion() {
+    if (running) return;
+
+    const words = input.split(' ');
+    const lastWord = words[words.length - 1] || '';
+
+    const matches = await window.w2l.getTabCompletion({
+      cwdWin,
+      lastWord
+    });
+
+    if (matches.length === 1) {
+      const match = matches[0];
+      const suffix = match.isDirectory ? '/' : ' ';
+      const completedText = match.completion + suffix;
+      
+      words[words.length - 1] = completedText;
+      setInput(words.join(' '));
+    } else if (matches.length > 1) {
+      // Print matches to screen
+      const optionLines = matches.map(m => m.name + (m.isDirectory ? '/' : ''));
+      setLines((l) => [
+        ...l,
+        { text: optionLines.join('    '), cls: 'faint' },
+        { spacer: true }
+      ]);
+      
+      // Auto-complete up to the common prefix
+      const completedPrefix = getCommonPrefix(matches.map(m => m.completion));
+      if (completedPrefix && completedPrefix.length > lastWord.length) {
+        words[words.length - 1] = completedPrefix;
+        setInput(words.join(' '));
+      }
+    }
+  }
+
   function onKey(e) {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -285,6 +335,9 @@ export function TerminalPanel({
         setInput(history[ni]);
         setHIdx(ni);
       }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      handleTabCompletion();
     } else if (e.key === 'c' && e.ctrlKey) {
       e.preventDefault();
       if (running) {

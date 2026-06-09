@@ -415,3 +415,48 @@ ipcMain.handle('write-file', (event, { filePath, content }) => {
     return { success: false, error: err.message };
   }
 });
+
+ipcMain.handle('get-tab-completion', async (event, { cwdWin, lastWord }) => {
+  try {
+    let dirPart = '';
+    let prefix = lastWord;
+    
+    // Normalize path separators
+    const normalizedLastWord = lastWord.replace(/\\/g, '/');
+    const lastSlash = normalizedLastWord.lastIndexOf('/');
+    if (lastSlash >= 0) {
+      dirPart = normalizedLastWord.substring(0, lastSlash);
+      prefix = normalizedLastWord.substring(lastSlash + 1);
+    }
+    
+    // Resolve target path
+    let targetDirWin = cwdWin;
+    if (dirPart) {
+      targetDirWin = nixToWin(dirPart, cwdWin);
+    }
+    
+    if (!fs.existsSync(targetDirWin) || !fs.statSync(targetDirWin).isDirectory()) {
+      return [];
+    }
+    
+    const items = fs.readdirSync(targetDirWin);
+    const prefixLower = prefix.toLowerCase();
+    
+    // Filter matching files/directories
+    const matches = items
+      .filter(name => name.toLowerCase().startsWith(prefixLower))
+      .map(name => {
+        const stat = fs.statSync(path.join(targetDirWin, name));
+        return {
+          name,
+          isDirectory: stat.isDirectory(),
+          completion: dirPart ? `${dirPart}/${name}` : name
+        };
+      });
+      
+    return matches;
+  } catch (err) {
+    return [];
+  }
+});
+

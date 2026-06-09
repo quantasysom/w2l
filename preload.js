@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('w2l', {
   runCommand: (options) => ipcRenderer.invoke('run-command', options),
   killActiveCommand: () => ipcRenderer.invoke('kill-active-command'),
   readWorkspaceDir: (dirPath) => ipcRenderer.invoke('read-workspace-dir', dirPath),
+  getTabCompletion: (options) => ipcRenderer.invoke('get-tab-completion', options),
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
   writeFile: (options) => ipcRenderer.invoke('write-file', options),
   
